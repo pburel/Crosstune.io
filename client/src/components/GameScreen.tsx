@@ -46,6 +46,12 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
     }
   }, [isCompleted, showResultsModal]);
 
+  // Handle modal close - allow closing but keep puzzle in completed state
+  const handleCloseResultsModal = () => {
+    setShowResultsModal(false);
+    // Puzzle remains completed, user can view the completed grid
+  };
+
   if (puzzleLoading || !puzzle) {
     return (
       <div className="min-h-screen">
@@ -89,6 +95,11 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Overlay when completed */}
+      {isCompleted && !showResultsModal && (
+        <div className="fixed inset-0 bg-black/30 z-40 pointer-events-none" />
+      )}
+      
       {/* Header */}
       <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -112,7 +123,7 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-4 grid grid-cols-12 gap-6">
+      <div className={`max-w-7xl mx-auto p-4 grid grid-cols-12 gap-6 ${isCompleted ? 'pointer-events-none' : ''}`}>
         {/* Left Sidebar Ad */}
         <div className="col-span-2 hidden lg:block">
           <SidebarAd />
@@ -124,9 +135,9 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
             puzzle={puzzle}
             selectedCell={selectedCell}
             currentClue={currentClue}
-            onCellClick={selectCell}
-            onCellInput={updateCell}
-            onCellClear={clearCell}
+            onCellClick={isCompleted ? () => {} : selectCell}
+            onCellInput={isCompleted ? () => {} : updateCell}
+            onCellClear={isCompleted ? () => {} : clearCell}
             getCellValue={getCellValue}
             getClueColor={getClueColor}
           />
@@ -139,7 +150,7 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
           <CluePanel
             puzzle={puzzle}
             currentClue={currentClue}
-            onClueSelect={selectClue}
+            onClueSelect={isCompleted ? () => {} : selectClue}
             getClueColor={getClueColor}
           />
         </div>
@@ -155,7 +166,7 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
       {/* Results Modal */}
       <ResultsModal
         isOpen={showResultsModal}
-        onClose={() => setShowResultsModal(false)}
+        onClose={handleCloseResultsModal}
         completionTime={completionTime}
         lettersFound={getCompletionStats().lettersFound}
         totalLetters={getCompletionStats().totalLetters}

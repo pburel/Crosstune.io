@@ -50,16 +50,16 @@ export default function ResultsModal({
   }, [isOpen]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogOverlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-gray-900 rounded-lg p-6 shadow-lg border">
+    <Dialog open={isOpen} onOpenChange={() => {}}>
+      <DialogOverlay className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50" />
+      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-gray-900 rounded-lg p-6 shadow-lg border pointer-events-auto">
         <DialogTitle className="sr-only">Puzzle Completion Results</DialogTitle>
         <DialogDescription className="sr-only">
           You've completed today's crossword puzzle. View your results and play other games.
         </DialogDescription>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 z-10"
         >
           <X size={20} />
         </button>
