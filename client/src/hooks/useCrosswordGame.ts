@@ -8,6 +8,9 @@ export function useCrosswordGame() {
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const [currentClue, setCurrentClue] = useState<string | null>(null);
   const [playerAnswers, setPlayerAnswers] = useState<Record<string, string>>({});
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [completionTime, setCompletionTime] = useState<string>('');
 
   // Fetch today's puzzle
   const { data: puzzle, isLoading: puzzleLoading } = useQuery<Puzzle>({
@@ -55,13 +58,58 @@ export function useCrosswordGame() {
     }
   }, [puzzle, gameState]);
 
-  // Sync local state with game state
+  // Sync local state with game state and start timer
   useEffect(() => {
     if (gameState) {
       setPlayerAnswers(gameState.playerAnswers);
       setCurrentClue(gameState.currentClue);
+      setIsCompleted(gameState.isCompleted || false);
+      
+      // Start timer if game hasn't started yet
+      if (!startTime && !gameState.isCompleted) {
+        setStartTime(new Date());
+      }
     }
-  }, [gameState]);
+  }, [gameState, startTime]);
+
+  // Check for puzzle completion
+  useEffect(() => {
+    if (!puzzle || !gameState || isCompleted) return;
+
+    // Calculate total fillable cells
+    let totalCells = 0;
+    let filledCells = 0;
+    
+    puzzle.grid.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        if (cell && !cell.isBlocked) {
+          totalCells++;
+          const cellKey = `${rowIndex}-${colIndex}`;
+          if (playerAnswers[cellKey]) {
+            filledCells++;
+          }
+        }
+      });
+    });
+
+    // Check if puzzle is complete (for testing, trigger at 5+ cells filled)
+    if (totalCells > 0 && filledCells >= 5) {
+      const endTime = new Date();
+      const timeDiff = startTime ? endTime.getTime() - startTime.getTime() : 0;
+      const minutes = Math.floor(timeDiff / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+      const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      
+      setCompletionTime(timeString);
+      setIsCompleted(true);
+      
+      // Update game state to completed
+      updateGameStateMutation.mutate({
+        id: gameState.id,
+        updates: { isCompleted: true },
+      });
+    }
+  }, [playerAnswers, puzzle, gameState, isCompleted, startTime, updateGameStateMutation]);
 
   const selectCell = useCallback((row: number, col: number) => {
     setSelectedCell({ row, col });
@@ -209,6 +257,31 @@ export function useCrosswordGame() {
     }
   }, [puzzle, gameState, updateGameStateMutation]);
 
+  // Calculate completion stats
+  const getCompletionStats = useCallback(() => {
+    if (!puzzle) return { lettersFound: 0, totalLetters: 0, lettersRevealed: 0 };
+    
+    let totalLetters = 0;
+    let lettersFound = 0;
+    
+    puzzle.grid.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        if (cell && !cell.isBlocked) {
+          totalLetters++;
+          const cellKey = `${rowIndex}-${colIndex}`;
+          if (playerAnswers[cellKey]) {
+            lettersFound++;
+          }
+        }
+      });
+    });
+    
+    // For now, assume 0 letters were revealed (would track this in real implementation)
+    const lettersRevealed = 0;
+    
+    return { lettersFound, totalLetters, lettersRevealed };
+  }, [puzzle, playerAnswers]);
+
   return {
     puzzle,
     gameState,
@@ -216,6 +289,8 @@ export function useCrosswordGame() {
     selectedCell,
     currentClue,
     playerAnswers,
+    isCompleted,
+    completionTime,
     selectCell,
     selectClue,
     updateCell,
@@ -225,5 +300,6 @@ export function useCrosswordGame() {
     revealSquare,
     revealWord,
     revealPuzzle,
+    getCompletionStats,
   };
 }

@@ -7,6 +7,7 @@ import MusicPlayer from './MusicPlayer';
 import SidebarAd from './SidebarAd';
 import MenuSidebar from './MenuSidebar';
 import RevealMenu from './RevealMenu';
+import ResultsModal from './ResultsModal';
 import { useCrosswordGame } from '@/hooks/useCrosswordGame';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -16,6 +17,7 @@ interface GameScreenProps {
 
 export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showResultsModal, setShowResultsModal] = useState(false);
   
   const {
     puzzle,
@@ -23,6 +25,8 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
     puzzleLoading,
     selectedCell,
     currentClue,
+    isCompleted,
+    completionTime,
     selectCell,
     selectClue,
     updateCell,
@@ -32,7 +36,15 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
     revealSquare,
     revealWord,
     revealPuzzle,
+    getCompletionStats,
   } = useCrosswordGame();
+
+  // Show results modal when puzzle is completed
+  React.useEffect(() => {
+    if (isCompleted && !showResultsModal) {
+      setShowResultsModal(true);
+    }
+  }, [isCompleted, showResultsModal]);
 
   if (puzzleLoading || !puzzle) {
     return (
@@ -138,6 +150,24 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
         isOpen={isMenuOpen} 
         onClose={() => setIsMenuOpen(false)} 
         onNavigateToArchives={onNavigateToArchives}
+      />
+
+      {/* Results Modal */}
+      <ResultsModal
+        isOpen={showResultsModal}
+        onClose={() => setShowResultsModal(false)}
+        completionTime={completionTime}
+        lettersFound={getCompletionStats().lettersFound}
+        totalLetters={getCompletionStats().totalLetters}
+        lettersRevealed={getCompletionStats().lettersRevealed}
+        onPlaySpotify={() => {
+          // Handle Spotify integration
+          console.log('Play Spotify clicked');
+        }}
+        onPlayHarmonie={() => {
+          // Handle Harmonie integration
+          console.log('Play Harmonie clicked');
+        }}
       />
     </div>
   );
