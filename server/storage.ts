@@ -91,7 +91,12 @@ export class MemStorage implements IStorage {
 
   async createGameState(insertGameState: InsertGameState): Promise<GameState> {
     const id = this.currentGameStateId++;
-    const gameState: GameState = { ...insertGameState, id };
+    const gameState: GameState = { 
+      ...insertGameState, 
+      id,
+      currentClue: insertGameState.currentClue ?? null,
+      isCompleted: insertGameState.isCompleted ?? false
+    };
     this.gameStates.set(id, gameState);
     return gameState;
   }

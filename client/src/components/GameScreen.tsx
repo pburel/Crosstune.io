@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Menu, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CrosswordGrid from './CrosswordGrid';
 import CluePanel from './CluePanel';
 import MusicPlayer from './MusicPlayer';
 import SidebarAd from './SidebarAd';
+import MenuSidebar from './MenuSidebar';
 import { useCrosswordGame } from '@/hooks/useCrosswordGame';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function GameScreen() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
   const {
     puzzle,
     gameState,
@@ -29,7 +32,7 @@ export default function GameScreen() {
         {/* Header */}
         <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(true)}>
               <Menu className="h-5 w-5 text-gray-600" />
             </Button>
             <div className="text-sm font-medium text-gray-600">8:59</div>
@@ -62,7 +65,7 @@ export default function GameScreen() {
       {/* Header */}
       <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(true)}>
             <Menu className="h-5 w-5 text-gray-600" />
           </Button>
           <div className="text-sm font-medium text-gray-600">8:59</div>
@@ -107,6 +110,9 @@ export default function GameScreen() {
           />
         </div>
       </div>
+
+      {/* Menu Sidebar */}
+      <MenuSidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </div>
   );
 }

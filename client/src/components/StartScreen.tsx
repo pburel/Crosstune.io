@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Menu, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SidebarAd from './SidebarAd';
+import MenuSidebar from './MenuSidebar';
 
 interface StartScreenProps {
   onStartGame: () => void;
 }
 
 export default function StartScreen({ onStartGame }: StartScreenProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm z-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(true)}>
             <Menu className="h-5 w-5 text-gray-600" />
           </Button>
           <div className="text-sm font-medium text-gray-600">8:59</div>
@@ -73,6 +76,9 @@ export default function StartScreen({ onStartGame }: StartScreenProps) {
           <SidebarAd isRight />
         </div>
       </div>
+
+      {/* Menu Sidebar */}
+      <MenuSidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </div>
   );
 }
