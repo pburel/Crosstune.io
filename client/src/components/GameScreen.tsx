@@ -1,0 +1,112 @@
+import React from 'react';
+import { Menu, Moon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import CrosswordGrid from './CrosswordGrid';
+import CluePanel from './CluePanel';
+import MusicPlayer from './MusicPlayer';
+import SidebarAd from './SidebarAd';
+import { useCrosswordGame } from '@/hooks/useCrosswordGame';
+import { Skeleton } from '@/components/ui/skeleton';
+
+export default function GameScreen() {
+  const {
+    puzzle,
+    gameState,
+    puzzleLoading,
+    selectedCell,
+    currentClue,
+    selectCell,
+    selectClue,
+    updateCell,
+    clearCell,
+    getCellValue,
+    getClueColor,
+  } = useCrosswordGame();
+
+  if (puzzleLoading || !puzzle) {
+    return (
+      <div className="min-h-screen">
+        {/* Header */}
+        <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <Button variant="ghost" size="sm">
+              <Menu className="h-5 w-5 text-gray-600" />
+            </Button>
+            <div className="text-sm font-medium text-gray-600">8:59</div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Thursday, July 10</span>
+              <Button variant="ghost" size="sm">
+                <Moon className="h-5 w-5 text-gray-600" />
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-7xl mx-auto p-4 grid grid-cols-12 gap-6">
+          <div className="col-span-2 hidden lg:block">
+            <Skeleton className="h-96 w-full" />
+          </div>
+          <div className="col-span-12 lg:col-span-6">
+            <Skeleton className="w-96 h-96 rounded-full mx-auto" />
+          </div>
+          <div className="col-span-12 lg:col-span-4">
+            <Skeleton className="h-96 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          <Button variant="ghost" size="sm">
+            <Menu className="h-5 w-5 text-gray-600" />
+          </Button>
+          <div className="text-sm font-medium text-gray-600">8:59</div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Thursday, July 10</span>
+            <Button variant="ghost" size="sm">
+              <Moon className="h-5 w-5 text-gray-600" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto p-4 grid grid-cols-12 gap-6">
+        {/* Left Sidebar Ad */}
+        <div className="col-span-2 hidden lg:block">
+          <SidebarAd />
+        </div>
+
+        {/* Main Game Area */}
+        <div className="col-span-12 lg:col-span-6">
+          <CrosswordGrid
+            puzzle={puzzle}
+            selectedCell={selectedCell}
+            currentClue={currentClue}
+            onCellClick={selectCell}
+            onCellInput={updateCell}
+            onCellClear={clearCell}
+            getCellValue={getCellValue}
+            getClueColor={getClueColor}
+          />
+          
+          <MusicPlayer currentClue={currentClue} />
+        </div>
+
+        {/* Right Sidebar - Clues */}
+        <div className="col-span-12 lg:col-span-4">
+          <CluePanel
+            puzzle={puzzle}
+            currentClue={currentClue}
+            onClueSelect={selectClue}
+            getClueColor={getClueColor}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
