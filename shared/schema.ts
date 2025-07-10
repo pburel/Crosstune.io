@@ -2,6 +2,11 @@ import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-c
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+});
+
 export const puzzles = pgTable("puzzles", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -24,10 +29,16 @@ export const insertPuzzleSchema = createInsertSchema(puzzles).omit({
   id: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+});
+
 export const insertGameStateSchema = createInsertSchema(gameStates).omit({
   id: true,
 });
 
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
 export type InsertPuzzle = z.infer<typeof insertPuzzleSchema>;
 export type Puzzle = typeof puzzles.$inferSelect;
 export type InsertGameState = z.infer<typeof insertGameStateSchema>;
