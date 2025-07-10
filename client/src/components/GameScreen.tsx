@@ -8,6 +8,7 @@ import SidebarAd from './SidebarAd';
 import MenuSidebar from './MenuSidebar';
 import RevealMenu from './RevealMenu';
 import ResultsModal from './ResultsModal';
+import StatsModal from './StatsModal';
 import { useCrosswordGame } from '@/hooks/useCrosswordGame';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -18,6 +19,7 @@ interface GameScreenProps {
 export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
   
   const {
     puzzle,
@@ -161,6 +163,7 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
         isOpen={isMenuOpen} 
         onClose={() => setIsMenuOpen(false)} 
         onNavigateToArchives={onNavigateToArchives}
+        onOpenStats={() => setShowStatsModal(true)}
       />
 
       {/* Results Modal */}
@@ -179,6 +182,13 @@ export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {
           // Handle Harmonie integration
           console.log('Play Harmonie clicked');
         }}
+      />
+
+      {/* Statistics Modal */}
+      <StatsModal
+        isOpen={showStatsModal}
+        onClose={() => setShowStatsModal(false)}
+        userId={1}
       />
     </div>
   );

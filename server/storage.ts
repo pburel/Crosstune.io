@@ -1,6 +1,11 @@
-import { users, puzzles, gameStates, type User, type InsertUser, type Puzzle, type InsertPuzzle, type GameState, type InsertGameState } from "@shared/schema";
+import { 
+  users, puzzles, gameStates, userStats, achievements, userAchievements,
+  type User, type InsertUser, type Puzzle, type InsertPuzzle, 
+  type GameState, type InsertGameState, type UserStats, type InsertUserStats,
+  type Achievement, type InsertAchievement, type UserAchievement, type InsertUserAchievement
+} from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -17,6 +22,23 @@ export interface IStorage {
   getGameState(puzzleId: number): Promise<GameState | undefined>;
   createGameState(gameState: InsertGameState): Promise<GameState>;
   updateGameState(id: number, updates: Partial<GameState>): Promise<GameState | undefined>;
+  
+  // User statistics operations
+  getUserStats(userId: number): Promise<UserStats | undefined>;
+  createUserStats(userStats: InsertUserStats): Promise<UserStats>;
+  updateUserStats(userId: number, updates: Partial<UserStats>): Promise<UserStats | undefined>;
+  
+  // Achievement operations
+  getAchievements(): Promise<Achievement[]>;
+  getUserAchievements(userId: number): Promise<UserAchievement[]>;
+  unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement>;
+  
+  // Progress operations
+  getUserProgress(userId: number): Promise<{
+    stats: UserStats;
+    recentGames: GameState[];
+    achievements: UserAchievement[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -86,6 +108,88 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return gameState || undefined;
   }
+
+  // User statistics operations
+  async getUserStats(userId: number): Promise<UserStats | undefined> {
+    const [stats] = await db.select().from(userStats).where(eq(userStats.userId, userId));
+    return stats || undefined;
+  }
+
+  async createUserStats(insertUserStats: InsertUserStats): Promise<UserStats> {
+    const [stats] = await db
+      .insert(userStats)
+      .values(insertUserStats)
+      .returning();
+    return stats;
+  }
+
+  async updateUserStats(userId: number, updates: Partial<UserStats>): Promise<UserStats | undefined> {
+    const [stats] = await db
+      .update(userStats)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userStats.userId, userId))
+      .returning();
+    return stats || undefined;
+  }
+
+  // Achievement operations
+  async getAchievements(): Promise<Achievement[]> {
+    return await db.select().from(achievements);
+  }
+
+  async getUserAchievements(userId: number): Promise<UserAchievement[]> {
+    return await db.select().from(userAchievements).where(eq(userAchievements.userId, userId));
+  }
+
+  async unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement> {
+    const [userAchievement] = await db
+      .insert(userAchievements)
+      .values({ userId, achievementId })
+      .returning();
+    return userAchievement;
+  }
+
+  // Progress operations
+  async getUserProgress(userId: number): Promise<{
+    stats: UserStats;
+    recentGames: GameState[];
+    achievements: UserAchievement[];
+  }> {
+    // Get or create user stats
+    let stats = await this.getUserStats(userId);
+    if (!stats) {
+      stats = await this.createUserStats({ 
+        userId,
+        totalPuzzlesCompleted: 0,
+        totalTimePlayed: 0,
+        averageCompletionTime: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        totalHintsUsed: 0,
+        totalLettersRevealed: 0,
+        lastPlayedDate: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    }
+
+    // Get recent games (last 10)
+    const recentGames = await db
+      .select()
+      .from(gameStates)
+      .where(eq(gameStates.puzzleId, 1)) // For now, just get games for puzzle 1
+      .orderBy(desc(gameStates.startTime))
+      .limit(10);
+
+    // Get user achievements
+    const userAchievements = await this.getUserAchievements(userId);
+
+    return {
+      stats,
+      recentGames,
+      achievements: userAchievements
+    };
+  }
 }
 
 // Initialize sample data for the database
@@ -131,6 +235,46 @@ async function initializeSampleData() {
 
       await db.insert(puzzles).values(samplePuzzle);
       console.log("Sample puzzle initialized in database");
+    }
+
+    // Initialize sample achievements
+    const existingAchievements = await db.select().from(achievements);
+    if (existingAchievements.length === 0) {
+      const sampleAchievements: InsertAchievement[] = [
+        {
+          name: "First Steps",
+          description: "Complete your first crossword puzzle",
+          icon: "🎯",
+          condition: JSON.stringify({ type: "puzzles_completed", value: 1 })
+        },
+        {
+          name: "Speed Demon",
+          description: "Complete a puzzle in under 3 minutes",
+          icon: "⚡",
+          condition: JSON.stringify({ type: "completion_time", value: 180 })
+        },
+        {
+          name: "Perfect Score",
+          description: "Complete a puzzle without using any hints",
+          icon: "⭐",
+          condition: JSON.stringify({ type: "no_hints", value: true })
+        },
+        {
+          name: "Streak Master",
+          description: "Complete 7 puzzles in a row",
+          icon: "🔥",
+          condition: JSON.stringify({ type: "streak", value: 7 })
+        },
+        {
+          name: "Music Lover",
+          description: "Complete 10 music-themed puzzles",
+          icon: "🎵",
+          condition: JSON.stringify({ type: "puzzles_completed", value: 10 })
+        }
+      ];
+
+      await db.insert(achievements).values(sampleAchievements);
+      console.log("Sample achievements initialized in database");
     }
   } catch (error) {
     console.error("Error initializing sample data:", error);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Home, Archive, Users, Shield } from 'lucide-react';
+import { X, Home, Archive, Users, Shield, BarChart3, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -7,9 +7,10 @@ interface MenuSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigateToArchives?: () => void;
+  onOpenStats?: () => void;
 }
 
-export default function MenuSidebar({ isOpen, onClose, onNavigateToArchives }: MenuSidebarProps) {
+export default function MenuSidebar({ isOpen, onClose, onNavigateToArchives, onOpenStats }: MenuSidebarProps) {
   if (!isOpen) return null;
 
   return (
@@ -60,6 +61,17 @@ export default function MenuSidebar({ isOpen, onClose, onNavigateToArchives }: M
             >
               <Archive className="h-4 w-4 mr-3" />
               Archives
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-left p-3 hover:bg-gray-100"
+              onClick={() => {
+                onOpenStats?.();
+                onClose();
+              }}
+            >
+              <BarChart3 className="h-4 w-4 mr-3" />
+              Statistics
             </Button>
             <Button 
               variant="ghost" 

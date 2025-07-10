@@ -98,6 +98,32 @@
     background-color: var(--game-orange);
   }
   
+  /* Custom gold colors for achievements */
+  .bg-gold-50 {
+    background-color: hsl(48, 100%, 96%);
+  }
+  .bg-gold-900\/20 {
+    background-color: hsla(38, 84%, 30%, 0.2);
+  }
+  .border-gold-200 {
+    border-color: hsl(48, 97%, 77%);
+  }
+  .border-gold-700 {
+    border-color: hsl(45, 92%, 47%);
+  }
+  .text-gold-900 {
+    color: hsl(38, 84%, 30%);
+  }
+  .text-gold-100 {
+    color: hsl(48, 96%, 89%);
+  }
+  .text-gold-700 {
+    color: hsl(45, 92%, 47%);
+  }
+  .text-gold-200 {
+    color: hsl(48, 97%, 77%);
+  }
+  
   .game-blue {
     color: var(--game-blue);
   }

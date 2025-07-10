@@ -62,6 +62,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
+      
+      // If completing the puzzle, update completion time and stats
+      if (updates.isCompleted && !updates.completionTime) {
+        updates.completionTime = new Date();
+        
+        // Calculate time taken
+        const gameState = await storage.getGameState(parseInt(req.params.id));
+        if (gameState?.startTime) {
+          const timeTaken = Math.floor((updates.completionTime.getTime() - new Date(gameState.startTime).getTime()) / 1000);
+          updates.timeTaken = timeTaken;
+          
+          // Update user stats (for now using hardcoded userId = 1)
+          const userId = 1;
+          const userStats = await storage.getUserStats(userId);
+          
+          if (userStats) {
+            const newCompletedCount = (userStats.totalPuzzlesCompleted || 0) + 1;
+            const newTotalTime = (userStats.totalTimePlayed || 0) + timeTaken;
+            const newAverageTime = Math.floor(newTotalTime / newCompletedCount);
+            
+            await storage.updateUserStats(userId, {
+              totalPuzzlesCompleted: newCompletedCount,
+              totalTimePlayed: newTotalTime,
+              averageCompletionTime: newAverageTime,
+              lastPlayedDate: new Date(),
+              updatedAt: new Date()
+            });
+          }
+        }
+      }
+      
       const gameState = await storage.updateGameState(id, updates);
       if (!gameState) {
         return res.status(404).json({ message: "Game state not found" });
@@ -69,6 +100,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(gameState);
     } catch (error) {
       res.status(500).json({ message: "Failed to update game state" });
+    }
+  });
+
+  // User statistics routes
+  app.get('/api/stats/user/:userId', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const progress = await storage.getUserProgress(userId);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching user progress:", error);
+      res.status(500).json({ message: "Failed to fetch user progress" });
+    }
+  });
+
+  app.get('/api/achievements', async (req, res) => {
+    try {
+      const achievements = await storage.getAchievements();
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  app.get('/api/achievements/user/:userId', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const userAchievements = await storage.getUserAchievements(userId);
+      res.json(userAchievements);
+    } catch (error) {
+      console.error("Error fetching user achievements:", error);
+      res.status(500).json({ message: "Failed to fetch user achievements" });
     }
   });
 
