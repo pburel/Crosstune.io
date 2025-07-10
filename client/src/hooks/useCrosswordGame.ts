@@ -92,8 +92,8 @@ export function useCrosswordGame() {
       });
     });
 
-    // Check if puzzle is complete (for testing, trigger at 5+ cells filled)
-    if (totalCells > 0 && filledCells >= 5) {
+    // Check if puzzle is complete (all cells filled)
+    if (totalCells > 0 && filledCells === totalCells) {
       const endTime = new Date();
       const timeDiff = startTime ? endTime.getTime() - startTime.getTime() : 0;
       const minutes = Math.floor(timeDiff / (1000 * 60));

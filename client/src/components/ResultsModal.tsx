@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogOverlay, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Play, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -51,8 +51,12 @@ export default function ResultsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
-      <DialogContent className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md mx-auto relative">
+      <DialogOverlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-gray-900 rounded-lg p-6 shadow-lg border">
+        <DialogTitle className="sr-only">Puzzle Completion Results</DialogTitle>
+        <DialogDescription className="sr-only">
+          You've completed today's crossword puzzle. View your results and play other games.
+        </DialogDescription>
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
