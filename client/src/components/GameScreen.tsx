@@ -6,10 +6,15 @@ import CluePanel from './CluePanel';
 import MusicPlayer from './MusicPlayer';
 import SidebarAd from './SidebarAd';
 import MenuSidebar from './MenuSidebar';
+import RevealMenu from './RevealMenu';
 import { useCrosswordGame } from '@/hooks/useCrosswordGame';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function GameScreen() {
+interface GameScreenProps {
+  onNavigateToArchives?: () => void;
+}
+
+export default function GameScreen({ onNavigateToArchives }: GameScreenProps = {}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const {
@@ -24,6 +29,9 @@ export default function GameScreen() {
     clearCell,
     getCellValue,
     getClueColor,
+    revealSquare,
+    revealWord,
+    revealPuzzle,
   } = useCrosswordGame();
 
   if (puzzleLoading || !puzzle) {
@@ -38,6 +46,13 @@ export default function GameScreen() {
             <div className="text-sm font-medium text-gray-600">8:59</div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">Thursday, July 10</span>
+              <RevealMenu
+                onRevealSquare={revealSquare}
+                onRevealWord={revealWord}
+                onRevealPuzzle={revealPuzzle}
+                hasSelectedCell={!!selectedCell}
+                hasCurrentClue={!!currentClue}
+              />
               <Button variant="ghost" size="sm">
                 <Moon className="h-5 w-5 text-gray-600" />
               </Button>
@@ -71,6 +86,13 @@ export default function GameScreen() {
           <div className="text-sm font-medium text-gray-600">8:59</div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Thursday, July 10</span>
+            <RevealMenu
+              onRevealSquare={revealSquare}
+              onRevealWord={revealWord}
+              onRevealPuzzle={revealPuzzle}
+              hasSelectedCell={!!selectedCell}
+              hasCurrentClue={!!currentClue}
+            />
             <Button variant="ghost" size="sm">
               <Moon className="h-5 w-5 text-gray-600" />
             </Button>
@@ -112,7 +134,11 @@ export default function GameScreen() {
       </div>
 
       {/* Menu Sidebar */}
-      <MenuSidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <MenuSidebar 
+        isOpen={isMenuOpen} 
+        onClose={() => setIsMenuOpen(false)} 
+        onNavigateToArchives={onNavigateToArchives}
+      />
     </div>
   );
 }

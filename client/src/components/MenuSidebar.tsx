@@ -6,9 +6,10 @@ import { Card, CardContent } from '@/components/ui/card';
 interface MenuSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onNavigateToArchives?: () => void;
 }
 
-export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
+export default function MenuSidebar({ isOpen, onClose, onNavigateToArchives }: MenuSidebarProps) {
   if (!isOpen) return null;
 
   return (
@@ -52,6 +53,10 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
             <Button 
               variant="ghost" 
               className="w-full justify-start text-left p-3 hover:bg-gray-100"
+              onClick={() => {
+                onNavigateToArchives?.();
+                onClose();
+              }}
             >
               <Archive className="h-4 w-4 mr-3" />
               Archives
